@@ -31,6 +31,10 @@ import butterknife.OnClick;
 
 public class MainActivity extends Activity {
 
+    public static final String TYPE = "type";
+
+    public static final int TYPE_UPDATE = 1;
+
     @InjectView(R.id.chat)
     ListView chat;
 

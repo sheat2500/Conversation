@@ -37,7 +37,7 @@
                 <action android:name="android.intent.action.USER_PRESENT" />
             </intent-filter>
         </receiver>
-        <receiver android:name="com.parse.ParsePushBroadcastReceiver"
+        <receiver android:name=".Receiver.ConversationReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.parse.push.intent.RECEIVE" />
@@ -59,7 +59,11 @@
         </receiver>
 
         <meta-data android:name="com.parse.push.gcm_sender_id"
-            android:value="id:1076345567071" />;
+            android:value="id:1076345567071" />
+
+        <!--Change Logo for notification-->
+        <meta-data android:name="com.parse.push.notification_icon"
+            android:resource="@android:drawable/btn_star"/>
 
     </application>
 
