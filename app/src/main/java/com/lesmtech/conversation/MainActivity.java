@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -19,17 +20,22 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 
 public class MainActivity extends Activity {
 
     @InjectView(R.id.chat)
     ListView chat;
+
+    @InjectView(R.id.message)
+    EditText inputMessage;
 
     private List<Message> messages;
 
@@ -117,14 +123,56 @@ public class MainActivity extends Activity {
                         Message message = new Message(object.getCreatedAt().toString(), object.get("content").toString(), object.getBoolean("sender"));
                         messages.add(message);
 //                        Log.d("content", object.get("content").toString()  + ";" + object.getCreatedAt().toString());
-
                         if (chat.getAdapter() == null) {
                             chat.setAdapter(mChatAdapter);
                         }
                         mChatAdapter.notifyDataSetChanged();
+                        chat.setSelection(mChatAdapter.getCount() - 1);
                     }
                 }
             }
         });
+    }
+
+    // OnClick Send, send message to Parse
+    @OnClick(R.id.send)
+    public void send() {
+        // Add new Message to the list, need to have another status to show the message is sending
+        Message newMsg = new Message();
+        newMsg.setContent(inputMessage.getText().toString());
+        newMsg.setSender(true);
+        messages.add(newMsg);
+        mChatAdapter.notifyDataSetChanged();
+        // Show the last one
+        chat.setSelection(mChatAdapter.getCount() - 1);
+
+        // Get messages from relation
+        final ParseUser user = ParseUser.getCurrentUser();
+        final ParseRelation relation = user.getRelation("Messages");
+        final ParseObject message = new ParseObject("Message");
+        message.put("sender", true);
+        message.put("content", inputMessage.getText().toString());
+        message.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    Log.d("message", message.getObjectId());
+                    // Save message before add to relation
+                    relation.add(message);
+                    user.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e == null) {
+                                // This done shows the message is sent successfully
+
+                            } else {
+                                // Change the message that has added to view to another status;
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
     }
 }
